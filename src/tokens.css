@@ -1,0 +1,650 @@
+/* ==========================================================================
+   MINIMAL — Design Tokens
+   Monochrome + semantic. Light and dark. One line weight. One radius language.
+   --------------------------------------------------------------------------
+   Every semantic token is declared ONCE, using light-dark(light, dark).
+   There is no duplicated dark-mode block to forget to update.
+
+   Setup:
+     <html>                      → follows the OS
+     <html data-theme="light">   → forced light
+     <html data-theme="dark">    → forced dark
+
+   Requires light-dark() — Chrome 123+, Safari 17.5+, Firefox 120+.
+   For older targets, compile these to two static blocks at build time.
+
+   Rule: never write a hex value in a component. Always use a semantic token.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. PRIMITIVES — the raw ramp. Do not use these directly in components.
+   -------------------------------------------------------------------------- */
+:root {
+  --n-0:    #FFFFFF;
+  --n-25:   #FCFCFD;
+  --n-50:   #F7F7F8;
+  --n-100:  #F1F1F3;
+  --n-200:  #E4E4E7;
+  --n-300:  #D2D2D8;
+  --n-400:  #A5A5AE;
+  --n-450:  #8E8E97;  /* lightest gray that clears 3:1 on white */
+  --n-500:  #71717A;
+  --n-600:  #56565C;
+  --n-700:  #3D3D43;
+  --n-800:  #26262A;
+  --n-900:  #171719;
+  --n-950:  #0E0E10;
+  --n-1000: #000000;
+
+  /* Dark-side neutrals — the ramp read from the other end. */
+  --d-page:    #0E0E10;
+  --d-sunken:  #09090B;
+  --d-raised:  #18181B;
+  --d-overlay: #1C1C20;
+  --d-100:     #232327;
+  --d-200:     #2E2E33;
+  --d-300:     #3A3A41;
+  --d-400:     #55555E;
+  --d-450:     #6A6A74;  /* lightest gray that clears 3:1 on #0E0E10 */
+  --d-500:     #8A8A92;
+  --d-550:     #8A8A95;
+  --d-600:     #A1A1A8;
+  --d-700:     #DEDEE2;
+  --d-800:     #F2F2F3;
+  --d-disabled:#5A5A62;
+
+  /* Alpha neutrals — washes over unknown backgrounds. */
+  --a-black-40: rgba(0, 0, 0, 0.40);
+  --a-black-60: rgba(0, 0, 0, 0.60);
+  --a-white-6:  rgba(255, 255, 255, 0.06);
+  --a-white-8:  rgba(255, 255, 255, 0.08);
+  --a-white-10: rgba(255, 255, 255, 0.10);
+  --a-white-14: rgba(255, 255, 255, 0.14);
+
+  /* Semantic hues. Three only. Each earns its place. */
+  --green-600: #0F7A34;  --green-500: #16A34A;
+  --green-400: #4ADE80;  --green-50:  #ECFDF3;  --green-line: #A9E5C0;
+
+  --amber-600: #8A5A00;  --amber-500: #B45309;
+  --amber-400: #FBBF24;  --amber-50:  #FFF8EB;  --amber-line: #F4D08A;
+
+  --red-700:   #9A1E14;  --red-600:   #B42318;  --red-550: #C42F33;
+  --red-525:   #D93A3F;  --red-500:   #DC2626;
+  --red-400:   #F87171;  --red-50:    #FEF2F2;  --red-line: #F2B8B2;
+}
+
+/* --------------------------------------------------------------------------
+   2. NON-COLOR TOKENS — identical in both themes.
+   -------------------------------------------------------------------------- */
+:root {
+  /* --- Typography --------------------------------------------------------
+     Plus Jakarta Sans (SIL Open Font License). Wider and rounder than Inter
+     with a large x-height, so the tracking below is ~35% less negative than a
+     Inter/SF ramp would use — on this face the tighter values read cramped.
+     Load weights 400/500/600 only; there is no bold in the UI. */
+  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont,
+               "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "SFMono-Regular", "JetBrains Mono",
+               Menlo, Consolas, monospace;
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+
+  /* size / line-height / tracking — never mix rows */
+  --t-display-size: 48px;
+  --t-display-lh: 52px;
+  --t-display-ls: -0.020em;
+
+  --t-h1-size: 32px;
+  --t-h1-lh: 38px;
+  --t-h1-ls: -0.014em;
+
+  --t-h2-size: 24px;
+  --t-h2-lh: 30px;
+  --t-h2-ls: -0.012em;
+
+  --t-h3-size: 20px;
+  --t-h3-lh: 26px;
+  --t-h3-ls: -0.009em;
+
+  --t-title-size: 17px;
+  --t-title-lh: 24px;
+  --t-title-ls: -0.006em;
+
+  --t-body-lg-size: 17px;
+  --t-body-lg-lh: 26px;
+  --t-body-lg-ls: -0.006em;
+
+  --t-body-size: 15px;
+  --t-body-lh: 22px;
+  --t-body-ls: -0.004em;
+
+  --t-label-size: 14px;
+  --t-label-lh: 20px;
+  --t-label-ls: -0.002em;
+
+  --t-caption-size: 13px;
+  --t-caption-lh: 18px;
+  --t-caption-ls: 0em;
+
+  --t-micro-size: 11px;
+  --t-micro-lh: 14px;
+  --t-micro-ls: 0.020em;
+
+  /* --- Space — 4px base -------------------------------------------------- */
+  --s-0: 0px;    --s-1: 2px;    --s-2: 4px;    --s-3: 6px;
+  --s-4: 8px;    --s-5: 12px;   --s-6: 16px;   --s-7: 20px;
+  --s-8: 24px;   --s-9: 32px;   --s-10: 40px;  --s-11: 48px;
+  --s-12: 64px;  --s-13: 80px;  --s-14: 96px;  --s-15: 128px;
+
+  /* --- Radius --------------------------------------------------------------
+     Three steps, each double the last: 4 / 8 / 16. Every radius on every
+     project divides cleanly by 4, same as the space scale — 10 (the old
+     default) doesn't, and a number that doesn't divide by the grid it sits on
+     reads as slightly off even when nobody can say why. --r-xl is gone: cards,
+     popovers, modals, and sheets now share one large radius (16) instead of a
+     14/20 split that wasn't earning its keep. */
+  --r-xs: 4px;        /* chips, tags, badges, checkbox, small indicators */
+  --r-sm: 4px;        /* alias of xs — kept for components already using it */
+  --r-control: 8px;   /* THE default: buttons, inputs, selects, menu items */
+  --r-md: 8px;        /* alias of control */
+  --r-lg: 16px;        /* cards, panels, popovers, modals, sheets */
+  --r-xl: 16px;        /* alias of lg — modals/sheets no longer get their own step */
+  --r-full: 9999px;   /* pills, avatars, toggles */
+
+  /* --- Line weight — there is exactly one --------------------------------- */
+  --line: 1px;
+
+  /* --- Motion ------------------------------------------------------------ */
+  --d-instant: 0ms;
+  --d-fast: 120ms;    /* hover/press on small elements */
+  --d-base: 180ms;    /* the default */
+  --d-slow: 260ms;    /* modals, sheets arriving */
+  --d-slower: 400ms;  /* route transitions */
+
+  --e-standard: cubic-bezier(0.2, 0, 0, 1);
+  --e-entrance: cubic-bezier(0.16, 1, 0.3, 1);
+  --e-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  --press-scale: 0.98;
+
+  /* --- Layout ------------------------------------------------------------ */
+  --container-content: 720px;
+  --container-app: 1200px;
+  --container-wide: 1440px;
+  --gutter: 24px;
+  --page-pad-sm: 16px;
+  --page-pad-md: 24px;
+  --page-pad-lg: 32px;
+
+  /* --- Canvas classes ----------------------------------------------------
+     Media queries can't read custom properties, so the literals below are
+     repeated in the @media rules in section 5. These exist so JS, container
+     queries, and docs read from one place. Ranges are contiguous — no gaps,
+     no overlaps. See reference/surfaces.md. */
+  --bp-micro:    0px;     /* watch, small widget, mini surface   */
+  --bp-compact:  320px;   /* phone portrait, folded outer display */
+  --bp-medium:   600px;   /* tablet portrait, phone landscape     */
+  --bp-expanded: 840px;   /* tablet landscape, small laptop       */
+  --bp-large:    1200px;  /* desktop                              */
+  --bp-xlarge:   1600px;  /* large desktop, TV at 1920 logical    */
+
+  /* Page padding per class — set automatically in section 5. */
+  --page-pad: 16px;
+  /* Columns available at the current class — for grid layouts. */
+  --columns: 4;
+
+  /* --- Safe areas — notches, home indicators, rounded corners, overscan --- */
+  --safe-top:    env(safe-area-inset-top, 0px);
+  --safe-right:  env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left:   env(safe-area-inset-left, 0px);
+
+  /* --- Z-index ----------------------------------------------------------- */
+  --z-base: 0;      --z-sticky: 100;  --z-dropdown: 200;
+  --z-overlay: 300; --z-modal: 400;   --z-toast: 500;  --z-tooltip: 600;
+
+  /* --- Controls ----------------------------------------------------------
+     These are the POINTER baseline. Section 6 raises them automatically for
+     coarse pointers and for TV. Component code never branches on device — it
+     reads these tokens and the right thing happens. */
+  --control-h-sm: 32px;
+  --control-h-md: 40px;
+  --control-h-lg: 48px;
+  --hit-target-min: 44px;   /* the transparent hit area, not the visible box */
+  --row-h: 48px;            /* table and list rows */
+
+  /* Focus scale — 1 everywhere except TV, where distance demands it. */
+  --focus-scale: 1;
+}
+
+/* --------------------------------------------------------------------------
+   3. THEME SWITCHING
+   -------------------------------------------------------------------------- */
+:root                  { color-scheme: light dark; }  /* follow the OS */
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"]  { color-scheme: dark; }
+
+/* --------------------------------------------------------------------------
+   4. SEMANTIC TOKENS — light-dark(LIGHT, DARK). Use only these in components.
+   -------------------------------------------------------------------------- */
+:root {
+  /* --- Surfaces ---------------------------------------------------------- */
+  /* Light page is the brightest white. Dark page is a very dark gray,
+     never pure black. Light carries depth in shadow; dark carries it in
+     surface lightness plus a hairline. */
+  --surface-page:     light-dark(var(--n-0),  var(--d-page));
+  --surface-raised:   light-dark(var(--n-0),  var(--d-raised));
+  --surface-sunken:   light-dark(var(--n-50), var(--d-sunken));
+  --surface-overlay:  light-dark(var(--n-0),  var(--d-overlay));
+  --surface-inverse:  light-dark(var(--n-950), var(--n-0));
+  --surface-scrim:    light-dark(var(--a-black-40), var(--a-black-60));
+
+  /* Filled control surface — inputs, selects, search fields at rest.
+     A control's edge is a fill difference against --surface-page, not a
+     border; this is deliberately the same value as --surface-sunken (a
+     control fill is functionally a shallow well) but named separately so a
+     future change to one doesn't silently retune the other. See SKILL.md
+     "Controls are filled, not outlined." */
+  --surface-control:       light-dark(var(--n-50),  var(--d-sunken));
+  --surface-control-hover: light-dark(var(--n-100), var(--d-100));
+
+  /* Washes for hover/press on otherwise transparent things */
+  --surface-hover:    light-dark(var(--n-50),  var(--a-white-6));
+  --surface-active:   light-dark(var(--n-100), var(--a-white-10));
+  --surface-selected: light-dark(var(--n-100), var(--a-white-8));
+
+  /* --- Text -------------------------------------------------------------- */
+  --text-primary:   light-dark(var(--n-950), var(--d-800));
+  --text-secondary: light-dark(var(--n-600), var(--d-600));
+  --text-tertiary:  light-dark(var(--n-500), var(--d-500));
+  --text-disabled:  light-dark(var(--n-400), var(--d-disabled));
+  --text-inverse:   light-dark(var(--n-0),   var(--n-950));
+  --text-link:      light-dark(var(--n-950), var(--d-800));
+
+  /* --- Borders — one weight, four strengths ------------------------------ */
+  --border-subtle:  light-dark(var(--n-200), var(--d-100));  /* dividers, used sparingly */
+  --border-default: light-dark(var(--n-300), var(--d-200));  /* rare card-on-card edge */
+  --border-control: light-dark(var(--n-450), var(--d-450));  /* exceptions only — see note */
+  --border-strong:  light-dark(var(--n-500), var(--d-550));  /* hovered control that has a border */
+  --border-focus:   light-dark(var(--n-950), var(--d-800));
+
+  /* Raised/Overlay surfaces (cards, popovers, menus, dialogs, toasts): no
+     border in light mode, where shadow alone carries the boundary; a hairline
+     in dark mode, where shadow barely reads. One token instead of restating
+     "except in dark" on every component. */
+  --border-elevated: light-dark(transparent, var(--border-subtle));
+
+  /* NOTE on --border-control: this is NOT the default way a control shows its
+     edge — --surface-control (a fill difference) is. Reserve --border-control
+     for the short, function-required exception list: an unchecked checkbox or
+     radio (too small at 16-18px for fill contrast to read reliably) and a
+     switch track's off state; a control that must sit directly on a surface
+     sharing its own fill; and a Secondary button, whose border IS its entire
+     affordance since it carries no fill at rest. Wherever it is used, it must
+     still clear ≥3:1 (WCAG 1.4.11) — the technique changed, the accessibility
+     requirement didn't. This distinction is intentional, not an oversight. */
+
+  /* --- Icons ------------------------------------------------------------- */
+  --icon-primary:   light-dark(var(--n-950), var(--d-800));
+  --icon-secondary: light-dark(var(--n-500), var(--d-500));
+  --icon-disabled:  light-dark(var(--n-400), var(--d-disabled));
+  --icon-inverse:   light-dark(var(--n-0),   var(--n-950));
+
+  /* --- Primary action ---------------------------------------------------- */
+  /* Solid black on white; solid white on dark. Hover moves the fill one step
+     toward mid-gray (black lightens, white dims) — it reads as lifting toward
+     you. Press returns the fill and applies scale(0.98) — pushing down. */
+  --action-primary-bg:          light-dark(var(--n-950), var(--n-0));
+  --action-primary-bg-hover:    light-dark(var(--n-800), var(--d-700));
+  --action-primary-bg-active:   light-dark(var(--n-950), var(--n-0));
+  --action-primary-fg:          light-dark(var(--n-0),   var(--n-950));
+  --action-primary-bg-disabled: light-dark(var(--n-100), var(--d-100));
+  --action-primary-fg-disabled: light-dark(var(--n-400), var(--d-disabled));
+
+  /* --- Secondary action — outline ---------------------------------------- */
+  --action-secondary-bg:           transparent;
+  --action-secondary-bg-hover:     light-dark(var(--n-50),  var(--a-white-6));
+  --action-secondary-bg-active:    light-dark(var(--n-100), var(--a-white-10));
+  --action-secondary-fg:           light-dark(var(--n-950), var(--d-800));
+  --action-secondary-border:       light-dark(var(--n-300), var(--d-300));
+  --action-secondary-border-hover: light-dark(var(--n-400), var(--d-400));
+
+  /* --- Tertiary action — text only; shape appears on hover --------------- */
+  --action-tertiary-bg:        transparent;
+  --action-tertiary-bg-hover:  light-dark(var(--n-100), var(--a-white-8));
+  --action-tertiary-bg-active: light-dark(var(--n-200), var(--a-white-14));
+  --action-tertiary-fg:        light-dark(var(--n-950), var(--d-800));
+
+  /* --- Destructive ------------------------------------------------------- */
+  /* The one variant exempt from the lightening rule: danger DEEPENS on hover
+     in both themes, because white label text must stay above 4.5:1. */
+  --action-danger-bg:       light-dark(var(--red-600), var(--red-525));
+  --action-danger-bg-hover: light-dark(var(--red-700), var(--red-550));
+  --action-danger-fg:       var(--n-0);
+  --action-danger-border:   light-dark(var(--red-600), var(--red-525));
+
+  /* --- Destructive, three levels ------------------------------------------
+     Solid red is a shout. Reserve it for the moment of commitment — the confirm
+     button in a dialog. A destructive option sitting in a row, a menu or a
+     toolbar uses the outline or text level instead. */
+  --action-danger-secondary-fg:        light-dark(var(--red-600), var(--red-400));
+  --action-danger-secondary-border:    light-dark(var(--red-600), var(--red-400));
+  --action-danger-secondary-bg-hover:  light-dark(var(--red-50),  rgba(248,113,113,0.12));
+  --action-danger-secondary-bg-active: light-dark(var(--red-line),rgba(248,113,113,0.28));
+  --action-danger-tertiary-fg:         light-dark(var(--red-600), var(--red-400));
+  --action-danger-tertiary-bg-hover:   light-dark(var(--red-50),  rgba(248,113,113,0.12));
+  --action-danger-tertiary-bg-active:  light-dark(var(--red-line),rgba(248,113,113,0.28));
+
+  /* --- Focus ring — identical everywhere, never removed ------------------ */
+  --focus-ring:        light-dark(var(--n-950), var(--d-800));
+  --focus-ring-width:  2px;
+  --focus-ring-offset: 2px;
+
+  /* --- Status — the only color in the system ----------------------------- */
+  --status-success-fg:     light-dark(var(--green-600), var(--green-400));
+  --status-success-bg:     light-dark(var(--green-50),  rgba(74, 222, 128, 0.12));
+  --status-success-border: light-dark(var(--green-line),rgba(74, 222, 128, 0.28));
+  --status-success-solid:  light-dark(var(--green-500), var(--green-400));
+
+  --status-warning-fg:     light-dark(var(--amber-600), var(--amber-400));
+  --status-warning-bg:     light-dark(var(--amber-50),  rgba(251, 191, 36, 0.12));
+  --status-warning-border: light-dark(var(--amber-line),rgba(251, 191, 36, 0.28));
+  --status-warning-solid:  light-dark(var(--amber-500), var(--amber-400));
+
+  --status-danger-fg:      light-dark(var(--red-600), var(--red-400));
+  --status-danger-bg:      light-dark(var(--red-50),  rgba(248, 113, 113, 0.12));
+  --status-danger-border:  light-dark(var(--red-line),rgba(248, 113, 113, 0.28));
+  --status-danger-solid:   light-dark(var(--red-500), var(--red-400));
+
+  --status-neutral-fg:     light-dark(var(--n-600), var(--d-600));
+  --status-neutral-bg:     light-dark(var(--n-100), var(--a-white-8));
+  --status-neutral-border: light-dark(var(--n-200), var(--d-200));
+
+  /* --- Elevation --------------------------------------------------------- */
+  --shadow-e1:
+    0 1px 2px light-dark(rgba(0,0,0,0.04), rgba(0,0,0,0.30)),
+    0 1px 1px light-dark(rgba(0,0,0,0.03), rgba(0,0,0,0.20));
+  --shadow-e2:
+    0 4px 12px light-dark(rgba(0,0,0,0.06), rgba(0,0,0,0.40)),
+    0 1px 2px  light-dark(rgba(0,0,0,0.04), rgba(0,0,0,0.24));
+  --shadow-e3:
+    0 16px 40px light-dark(rgba(0,0,0,0.12), rgba(0,0,0,0.55)),
+    0 2px 8px   light-dark(rgba(0,0,0,0.06), rgba(0,0,0,0.32));
+
+  /* --- Skeleton ---------------------------------------------------------- */
+  --skeleton-base:  light-dark(var(--n-100), #202024);
+  --skeleton-sheen: light-dark(var(--n-50),  #2A2A2F);
+
+  /* --- Chrome material ---------------------------------------------------
+     The ONE translucent surface in the system. Sidebars, toolbars, sheets —
+     OS-level chrome only. Everything else stays opaque so contrast is never
+     a function of what happens to be scrolling underneath.
+     72% opacity is the floor at which text on top still clears 4.5:1 over
+     arbitrary content. Do not lower it. */
+  --surface-chrome: light-dark(rgba(255,255,255,0.72), rgba(24,24,27,0.72));
+  --border-chrome:  light-dark(rgba(0,0,0,0.08), rgba(255,255,255,0.10));
+  --chrome-blur: 24px;
+}
+
+/* Apply to chrome surfaces. Degrades to the flat 72% fill where
+   backdrop-filter is unsupported — which is still legible, by design. */
+.chrome {
+  background: var(--surface-chrome);
+  -webkit-backdrop-filter: blur(var(--chrome-blur));
+  backdrop-filter: blur(var(--chrome-blur));
+}
+
+/* ==========================================================================
+   5. ADAPTATION — one component, every surface.
+   --------------------------------------------------------------------------
+   Nothing here branches on device. It branches on capability (what input can
+   reach this?), on canvas size, and on an explicit data-surface attribute for
+   the two contexts CSS genuinely cannot detect: TV and watch.
+
+   Component code stays identical everywhere. See reference/surfaces.md.
+   ========================================================================== */
+
+/* --- 5a. Canvas classes ---------------------------------------------------
+   Contiguous ranges, no gaps, no overlaps. Mobile-first: each overrides the
+   last. Defaults above are the micro/compact case. */
+@media (min-width: 320px) {
+  :root { --page-pad: 16px; --columns: 4; }
+}
+@media (min-width: 600px) {
+  :root { --page-pad: 24px; --columns: 8; }
+}
+@media (min-width: 840px) {
+  :root { --page-pad: 32px; --columns: 12; }
+}
+@media (min-width: 1200px) {
+  :root { --page-pad: 40px; --columns: 12; }
+}
+@media (min-width: 1600px) {
+  :root { --page-pad: 48px; --columns: 12; }
+}
+
+/* --- 5b. Input modality ---------------------------------------------------
+   `any-pointer: coarse` matches if ANY available pointer is coarse — so a
+   touch laptop with a mouse attached still gets touch-sized targets. That is
+   deliberate: touch wins the sizing, hover is a bonus layer. */
+@media (any-pointer: coarse) {
+  :root {
+    --control-h-sm: 40px;
+    --control-h-md: 44px;
+    --control-h-lg: 52px;
+    --hit-target-min: 44px;
+    --row-h: 56px;
+  }
+}
+
+/* Hover states must be wrapped in this so they never latch on touch, where
+   :hover can stick after a tap.
+   Usage:  @media (hover: hover) and (pointer: fine) { .btn:hover { … } }      */
+
+/* --- 5c. Distance: TV / 10-foot ------------------------------------------
+   Set <html data-surface="tv">. Only sizes change — weights, tracking, color,
+   and radius are untouched, so it still reads as the same family. */
+:root[data-surface="tv"] {
+  color-scheme: dark;  /* dark is the default at distance */
+
+  --t-display-size: 72px; --t-display-lh: 78px;
+  --t-h1-size:      56px; --t-h1-lh:      62px;
+  --t-h2-size:      40px; --t-h2-lh:      46px;
+  --t-h3-size:      32px; --t-h3-lh:      38px;
+  --t-title-size:   28px; --t-title-lh:   36px;
+  --t-body-lg-size: 28px; --t-body-lg-lh: 40px;
+  --t-body-size:    24px; --t-body-lh:    34px;
+  --t-label-size:   22px; --t-label-lh:   30px;
+  --t-caption-size: 20px; --t-caption-lh: 28px;
+  --t-micro-size:   18px; --t-micro-lh:   24px;  /* the floor at 3m */
+
+  --control-h-sm: 48px;
+  --control-h-md: 56px;
+  --control-h-lg: 64px;
+  --hit-target-min: 56px;
+  --row-h: 72px;
+
+  --r-control: 12px;
+  --r-lg: 20px;
+  --r-xl: 24px;
+
+  /* Focus IS the cursor. This scale is the documented exception to
+     "nothing moves" — it's a transform, so it costs no layout, and the grid
+     must reserve headroom so neighbours never reflow. */
+  --focus-scale: 1.06;
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 4px;
+
+  /* 5% overscan inset on every edge. */
+  --safe-top: 5vh;  --safe-bottom: 5vh;
+  --safe-left: 5vw; --safe-right: 5vw;
+  --page-pad: 48px;
+}
+
+/* --- 5d. Distance: watch / glanceable ------------------------------------
+   Set <html data-surface="watch">. One action per screen, vertical only. */
+:root[data-surface="watch"] {
+  --t-h1-size:      24px; --t-h1-lh:      28px;
+  --t-h2-size:      22px; --t-h2-lh:      26px;
+  --t-h3-size:      20px; --t-h3-lh:      24px;
+  --t-title-size:   18px; --t-title-lh:   22px;
+  --t-body-lg-size: 17px; --t-body-lg-lh: 22px;
+  --t-body-size:    16px; --t-body-lh:    21px;
+  --t-label-size:   15px; --t-label-lh:   20px;
+  --t-caption-size: 14px; --t-caption-lh: 18px;
+  --t-micro-size:   13px; --t-micro-lh:   16px;  /* the floor on the wrist */
+
+  --control-h-md: 44px;
+  --control-h-lg: 52px;
+  --hit-target-min: 44px;
+
+  /* Larger radii sit better inside a curved display. */
+  --r-control: 16px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+
+  /* A glance doesn't wait. */
+  --d-fast: 100ms;
+  --d-base: 150ms;
+  --d-slow: 200ms;
+
+  --page-pad: 8px;
+}
+
+/* --- 5e. Widgets and mini surfaces ---------------------------------------
+   Set <html data-surface="widget">. One idea, no scroll, no navigation.
+   The OS owns the container — don't draw your own edge. */
+:root[data-surface="widget"] {
+  --page-pad: 12px;
+  --d-fast: 0ms;   /* widgets are composited, not interacted with */
+  --d-base: 0ms;
+}
+:root[data-surface="widget"] body {
+  background: transparent;  /* inherit the system material */
+  overflow: hidden;
+}
+
+/* --- 5f. Foldables --------------------------------------------------------
+   Two viewport segments means a hinge sits between them. Never place a
+   primary action, a form field, or running text across it. */
+@media (horizontal-viewport-segments: 2) {
+  :root {
+    --fold-left-width:  env(viewport-segment-width 0 0, 50vw);
+    --fold-gap-start:   env(viewport-segment-right 0 0, 50vw);
+    --fold-gap-end:     env(viewport-segment-left 1 0, 50vw);
+    --fold-gap: calc(var(--fold-gap-end) - var(--fold-gap-start));
+  }
+}
+@media (vertical-viewport-segments: 2) {
+  :root {
+    --fold-top-height: env(viewport-segment-height 0 0, 50vh);
+    --fold-gap-start:  env(viewport-segment-bottom 0 0, 50vh);
+    --fold-gap-end:    env(viewport-segment-top 0 1, 50vh);
+    --fold-gap: calc(var(--fold-gap-end) - var(--fold-gap-start));
+  }
+}
+
+/* --------------------------------------------------------------------------
+   6. BASELINE — the minimum every project inherits.
+   -------------------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  background: var(--surface-page);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--t-body-size);
+  line-height: var(--t-body-lh);
+  letter-spacing: var(--t-body-ls);
+  font-weight: var(--fw-regular);
+}
+
+/* Theme switching should feel like a dimmer, not a strobe.
+   Only color transitions — never layout. */
+body {
+  transition: background-color var(--d-base) var(--e-standard),
+              color var(--d-base) var(--e-standard);
+}
+
+/* One focus treatment, applied globally, never removed.
+   --focus-scale is 1 everywhere except TV, where focus is the cursor and
+   must be readable from three metres. */
+:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--r-xs);
+  transform: scale(var(--focus-scale));
+  transition: transform var(--d-base) var(--e-standard);
+}
+:focus:not(:focus-visible) { outline: none; }
+
+/* Touch: respond immediately, and never let :hover stick after a tap. */
+button, a, [role="button"], input, select, textarea, summary {
+  touch-action: manipulation;
+}
+
+/* Reach 44×44 without changing the visible box or the layout. */
+.hit-target { position: relative; }
+.hit-target::after {
+  content: "";
+  position: absolute;
+  inset: 50% 50%;
+  width: max(100%, var(--hit-target-min));
+  height: max(100%, var(--hit-target-min));
+  translate: -50% -50%;
+}
+
+/* Disclosure — the one place a size change may animate. The trigger must not
+   move; only the content below it does. See reference/disclosure.md. */
+.disclosure {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--d-slow) var(--e-entrance);
+}
+.disclosure > * { overflow: hidden; }
+.disclosure[data-open] {
+  grid-template-rows: 1fr;
+  transition: grid-template-rows var(--d-slow) var(--e-entrance);
+}
+.disclosure:not([data-open]) {
+  transition: grid-template-rows var(--d-base) var(--e-exit);
+}
+
+::selection {
+  background: var(--text-primary);
+  color: var(--surface-page);
+}
+
+/* Motion is an enhancement, never load-bearing. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   7. THEME TOGGLE — paste into <head> before any stylesheet to avoid a flash.
+   Only needed if you offer a manual light/dark switch; without it the system
+   already follows the OS.
+
+   <script>
+     (function () {
+       var t = localStorage.getItem('theme');
+       if (t === 'light' || t === 'dark') {
+         document.documentElement.dataset.theme = t;
+       }
+     })();
+   </script>
+   -------------------------------------------------------------------------- */

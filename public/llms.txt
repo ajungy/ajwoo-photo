@@ -1,0 +1,69 @@
+# ajwoo photo — agent guide
+
+ajwoo photo is a browser photo editor at https://photo.ajwoo.com. People use the interface; agents use
+`window.ajwooPhoto` in the same page (for example through a browser-automation tool). Both write the same
+edit operations, so every agent change shows up in history and the person can undo it.
+
+Everything runs in the browser. The original file is never modified or uploaded. Edits are a recipe that is
+re-rendered from the original, so values are absolute and repeatable.
+
+## Quick start
+
+```js
+const api = window.ajwooPhoto;
+await api.openImage(fileOrBlobOrUrl, 'beach.jpg');   // URL must be same-origin or CORS-enabled
+api.analyze();                                        // histogram, clipping %, mean/median luminance, warmth
+const { ops } = api.suggest('auto');                  // proposed auto tone + white balance (not applied)
+api.applyEdits({ ops, label: 'Auto' });
+api.applyEdits({
+  label: 'Darken sky',
+  ops: [
+    { op: 'addMask', id: 'sky', shape: { type: 'linear', from: [0.5, 0.0], to: [0.5, 0.45] },
+      adjust: { 'light.exposure': -0.6, 'color.temperature': -15 } },
+  ],
+});
+const preview = await api.renderPreview({ maxEdge: 768 });        // JPEG data URL to check your work
+const before = await api.renderPreview({ compare: 'original' });
+const file = await api.export({ format: 'jpeg', quality: 0.92 }); // { blob, name, width, height, ... }
+```
+
+## Methods
+
+- `describeControls(group?)` — every control: id, label, group, min, max, default, step, unit, maskable, meaning.
+- `openImage(source, name?)` — Blob/File or URL. Returns size and stats.
+- `getState()` — photo info, revision number, changed values, masks, and history (author: You or Agent).
+- `getRecipe()` — the full recipe JSON.
+- `analyze(region?)` — measured on a small render of the current edit. `region` is {x, y, w, h} in 0–1 of the output.
+- `applyEdits({ ops, label?, expectedRevision? })` — one history entry. If any op is invalid, nothing is applied and
+  every error is listed. Values are never silently clamped. Pass `expectedRevision` (from getState) to avoid
+  overwriting a newer human edit.
+- `suggest('auto')` — proposed ops; apply them yourself.
+- `renderPreview({ maxEdge?, compare?: 'original', overlay?: maskId })` — JPEG data URL (max 2048 px).
+- `undo()`, `redo()`
+- `export({ format?: 'jpeg' | 'png' | 'webp', quality?: 0–1, maxEdge? })` — full-resolution file. Up to 16.7 MP in this
+  version. Metadata (including location) is not written.
+
+## Ops
+
+- `{ op: 'set', control, value, target? }` — absolute. `target` is 'global' (default) or a mask id.
+- `{ op: 'adjust', control, delta, target? }` — relative; the response reports the resulting value.
+- `{ op: 'setCurve', channel: 'rgb' | 'r' | 'g' | 'b', points: [[x, y], ...] }` — 2–16 points in 0–1.
+- `{ op: 'setGeometry', rotate?: 0–3 quarter turns clockwise, flipH?, crop?: { x, y, w, h } }` — crop is in 0–1 of the rotated image.
+- `{ op: 'addMask', id?, name?, shape, invert?, amount?: 0–100, adjust?: { controlId: value } }` — up to 4 masks.
+  - `{ type: 'linear', from: [x, y], to: [x, y] }` — full effect at `from`, none at `to`.
+  - `{ type: 'radial', center: [x, y], radius: [rx, ry], feather: 0–1 }` — radius in fractions of width and height.
+  - `{ type: 'brush' }` — then paint with `paintBrush`.
+- `{ op: 'updateMask', id, shape?, invert?, amount?, name? }`, `{ op: 'removeMask', id }`
+- `{ op: 'paintBrush', mask, strokes: [{ points: [[x, y], ...], size, feather?, erase? }] }` — size is the brush
+  diameter as a fraction of the photo's longer edge.
+- `{ op: 'reset', scope?: 'all' | 'adjustments' | 'geometry' }`
+
+Mask positions are normalized 0–1 in the original photo (after camera orientation, before crop and rotation),
+so cropping never moves a mask.
+
+Maskable controls: light.exposure, light.contrast, light.highlights, light.shadows, color.temperature, color.tint,
+color.saturation, effects.clarity.
+
+## Not yet available
+
+Select subject / sky, healing and object removal, noise reduction, RAW, HEIC/TIFF outside Safari, PDF, zoom to 100%.
