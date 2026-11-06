@@ -6,6 +6,7 @@ import { HistogramView } from './ui/Histogram';
 import { CropPanel, MaskPanel, SECTIONS, SectionBody, sectionChanged } from './ui/Inspector';
 import { ExportDialog } from './ui/ExportDialog';
 import type { Stats } from './output';
+import { Tabs } from './ui/Primitives';
 
 const MODES: { id: Mode; label: string; icon: string }[] = [
   { id: 'edit', label: 'Edit', icon: 'M4 7h10M18 7h2M4 17h4M12 17h8M14 4v6M8 14v6' },
@@ -24,9 +25,9 @@ function useMedia(q: string) {
   return m;
 }
 
-function Icon({ d, size = 20 }: { d: string; size?: number }) {
+function Icon({ d, size = 18 }: { d: string; size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <path d={d} />
     </svg>
   );
@@ -83,17 +84,20 @@ function Toast() {
   const entry = useStore(s => s.entries[s.index]);
   const index = useStore(s => s.index);
   const [shown, setShown] = useState<number | null>(null);
+  const [paused, setPaused] = useState(false);
   useEffect(() => {
-    if (entry?.author !== 'Agent') return;
-    setShown(index);
+    if (entry?.author === 'Agent') setShown(index);
+  }, [entry, index]);
+  useEffect(() => {
+    if (shown === null || paused) return;
     const t = setTimeout(() => setShown(null), 6000);
     return () => clearTimeout(t);
-  }, [entry, index]);
+  }, [shown, paused]);
   if (shown === null || !entry || shown !== index) return null;
   return (
-    <div className="toast" role="status">
-      <span><strong>Agent</strong> · {entry.label}</span>
-      <button className="btn-tertiary sm inverse" onClick={() => { undo(); setShown(null); }}>Undo</button>
+    <div className="toast" role="status" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocus={() => setPaused(true)} onBlur={() => setPaused(false)}>
+      <span className="toast-text"><span className="toast-who">Agent</span> {entry.label}</span>
+      <button className="btn-tertiary sm" onClick={() => { undo(); setShown(null); }}>Undo</button>
     </div>
   );
 }
@@ -122,36 +126,35 @@ function DesktopEdit({ stats }: { stats: Stats | null }) {
 
 function Accordion({ section, open, toggle, stats }: { section: Section; open: boolean; toggle: () => void; stats: Stats | null }) {
   const changed = useStore(sectionChanged(section));
+  const id = 'section-' + section.replace(/\s/g, '-').toLowerCase();
   return (
     <section className="section">
-      <button className="section-head" aria-expanded={open} onClick={toggle}>
-        <span className="title-sm">{section}</span>
-        {changed && <span className="edited" title="Edited">Edited</span>}
-        <svg className="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden><path d={open ? 'M6 15l6-6 6 6' : 'M6 9l6 6 6-6'} /></svg>
+      <button className="section-head" aria-expanded={open} aria-controls={id} onClick={toggle}>
+        <span className="section-title">{section}</span>
+        {changed && <span className="edited">Edited</span>}
+        <svg className="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden><path d="M6 9l6 6 6-6" /></svg>
       </button>
-      {open && <div className="section-body"><SectionBody section={section} histogram={stats?.histogram ?? null} /></div>}
+      <div id={id} className="disclosure" data-open={open ? '' : undefined} {...(open ? {} : { inert: '' })}>
+        <div><div className="section-body"><SectionBody section={section} histogram={stats?.histogram ?? null} /></div></div>
+      </div>
     </section>
   );
 }
 
 function MobileEdit({ stats }: { stats: Stats | null }) {
   const section = useStore(s => s.section);
+  const changed = useStore(s => SECTIONS.filter(sec => sectionChanged(sec)(s)).join('|'));
   return (
     <>
-      <div className="chips scroll" role="tablist" aria-label="Adjustment group">
-        {SECTIONS.map(sec => <SectionChip key={sec} section={sec} active={sec === section} />)}
-      </div>
+      <Tabs
+        label="Adjustment group"
+        scroll
+        value={section}
+        onChange={v => setState({ section: v })}
+        items={SECTIONS.map(sec => ({ id: sec, label: <>{sec}{changed.split('|').includes(sec) && <span className="dot dot-sm" aria-label="edited" />}</> }))}
+      />
       <div className="sheet-body"><SectionBody section={section} histogram={stats?.histogram ?? null} /></div>
     </>
-  );
-}
-
-function SectionChip({ section, active }: { section: Section; active: boolean }) {
-  const changed = useStore(sectionChanged(section));
-  return (
-    <button role="tab" aria-selected={active} className="chip" onClick={() => setState({ section })}>
-      {section}{changed && <span className="dot sm" aria-label="edited" />}
-    </button>
   );
 }
 
@@ -276,28 +279,32 @@ export function App() {
       {fileField}
       <header className="header">
         <div className="header-left">
-          <span className="wordmark">ajwoo photo</span>
+          <button className="home" onClick={pick} title="Home: open a different photo" aria-label="ajwoo photo home: open a different photo">
+            <img src="./icon.svg" width={24} height={24} alt="" />
+            {!compact && <span className="wordmark">ajwoo photo</span>}
+          </button>
           <span className="file-name" title={image.name}>{image.name}</span>
           {!compact && <SaveStatus />}
         </div>
         <div className="header-right">
-          <button className="icon-btn" onClick={pick} aria-label="Open another photo" title="Open another photo">
-            <Icon d="M4 20h16M12 4v12M7 9l5-5 5 5" />
-          </button>
-          <button className="icon-btn" onClick={undo} disabled={!undoable} aria-label="Undo" title="Undo (⌘Z)"><Icon d={UNDO} /></button>
-          <button className="icon-btn" onClick={redo} disabled={!redoable} aria-label="Redo" title="Redo (⇧⌘Z)"><Icon d={REDO} /></button>
-          <button
-            className="btn-secondary sm compare-btn"
-            aria-pressed={compare}
-            title="Tap to toggle, hold to peek at the original (\)"
-            onPointerDown={compareDown}
-            onPointerUp={compareUp}
-            onPointerLeave={() => { if (held.current) compareUp(); }}
-            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setState({ compare: !getState().compare }); } }}
-          >
-            Compare
-          </button>
-          <button className="btn-primary sm" onClick={() => setExporting(true)}>Export</button>
+          <div className="header-group" role="group" aria-label="History">
+            <button className="icon-btn" onClick={undo} disabled={!undoable} aria-label="Undo" title={undoable ? 'Undo (⌘Z)' : 'Nothing to undo yet'}><Icon d={UNDO} /></button>
+            <button className="icon-btn" onClick={redo} disabled={!redoable} aria-label="Redo" title={redoable ? 'Redo (⇧⌘Z)' : 'Nothing to redo'}><Icon d={REDO} /></button>
+          </div>
+          <div className="header-group">
+            <button
+              className="btn-secondary sm compare-btn"
+              aria-pressed={compare}
+              title="Tap to toggle, hold to peek at the original (\)"
+              onPointerDown={compareDown}
+              onPointerUp={compareUp}
+              onPointerLeave={() => { if (held.current) compareUp(); }}
+              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setState({ compare: !getState().compare }); } }}
+            >
+              Compare
+            </button>
+            <button className="btn-primary sm" onClick={() => setExporting(true)}>Export</button>
+          </div>
         </div>
       </header>
 

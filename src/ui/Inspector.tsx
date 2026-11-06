@@ -5,6 +5,7 @@ import { brushLayers, commit, edit, getState, preview, setState, useStore, type 
 import { commitControl, inputControl, read, type Scope } from './controls';
 import { Slider } from './Slider';
 import { Curves } from './Curves';
+import { Switch } from './Primitives';
 import type { Histogram } from '../output';
 
 export const SECTIONS: Section[] = ['Light', 'Color', 'Curve', 'Color mixer', 'Grading', 'Effects'];
@@ -204,10 +205,9 @@ export function MaskPanel() {
         </ul>
       )}
       {masks.length > 0 && (
-        <label className="toggle-row">
-          <input type="checkbox" checked={overlay} onChange={e => setState({ overlay: e.target.checked })} />
-          Show mask overlay <span className="kbd">O</span>
-        </label>
+        <Switch checked={overlay} onChange={v => setState({ overlay: v })} hint={<span className="kbd" aria-hidden>O</span>}>
+          Show mask overlay
+        </Switch>
       )}
       {selected && <MaskSettings id={selected} />}
     </div>

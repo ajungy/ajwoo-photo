@@ -77,7 +77,7 @@ export function Slider({ control: c, value, onInput, onCommit, label, min = c.mi
           {name}
         </button>
         {value !== defaultValue && (
-          <button type="button" className="slider-reset" aria-label={`Reset ${name}`} title={`Reset ${name}`} onClick={() => onCommit(defaultValue)}>
+          <button type="button" className="slider-reset hit-target" aria-label={`Reset ${name}`} title={`Reset ${name}`} onClick={() => onCommit(defaultValue)}>
             Reset
           </button>
         )}

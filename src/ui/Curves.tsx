@@ -3,6 +3,7 @@ import { curveFn } from '../engine/curves';
 import { IDENTITY_CURVE, type CurveChannel, type CurvePoint } from '../engine/recipe';
 import { commit, getState, preview, useStore } from '../store';
 import type { Histogram } from '../output';
+import { Tabs } from './Primitives';
 
 const CHANNELS: { id: CurveChannel; label: string; color: string }[] = [
   { id: 'rgb', label: 'RGB', color: 'var(--text-primary)' },
@@ -83,14 +84,12 @@ export function Curves({ histogram }: { histogram: Histogram | null }) {
 
   return (
     <div className="curves">
-      <div className="chips" role="tablist" aria-label="Curve channel">
-        {CHANNELS.map(c => (
-          <button key={c.id} role="tab" aria-selected={c.id === channel} className="chip" onClick={() => { setChannel(c.id); setSelected(null); }}>
-            {c.id !== 'rgb' && <span className="dot" style={{ background: c.color }} />}
-            {c.label}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        label="Curve channel"
+        value={channel}
+        onChange={c => { setChannel(c); setSelected(null); }}
+        items={CHANNELS.map(c => ({ id: c.id, label: <>{c.id !== 'rgb' && <span className="dot" style={{ background: c.color }} />}{c.label}</> }))}
+      />
       <svg
         ref={svg}
         className="curve-graph"
